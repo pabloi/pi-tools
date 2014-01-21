@@ -1,6 +1,9 @@
 function [y] = interpft1(x,N,dim)
 %INTERPFT1 Replacement for the original interpft, with mirroring extension to allow for circular
 %continuity
+if nargin<3
+    dim=1;
+end
 
 %% To work for all dimensions
 % %Generate a string to properly ask for extension
@@ -27,9 +30,13 @@ function [y] = interpft1(x,N,dim)
 
 %% To work with only dim=1
 
-x2=[x;x(end:-1:1)];
-y2=interpft(x2,2*N);
-y=y2(1:N);
+x=permute(x,[dim 1:dim-1 dim+1:length(size(x))]);
+
+x2=[x;x(end:-1:1,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:)];
+y2=interpft(x2,2*N,1);
+y=y2(1:N,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:,:);
+
+y=depermute(y,[dim 1:dim-1 dim+1:length(size(x))]);
 
 end
 
