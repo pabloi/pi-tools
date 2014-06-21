@@ -1,4 +1,4 @@
-function [p] = ksdensityn(data,binsC,bandwidth)
+function [p] = ksdensityn(data,binsC,method,bandwidth,weights,k)
 %ksdensityn estimates a probability density from data points in
 %data. Estimation is done by convolving with a gaussian kernel.
 
@@ -18,21 +18,55 @@ end
 
 d=size(data,2); %Dimension of data (<3)
 n=size(data,1); %Number of observations
-M=cov(data); %Covariance matrix
+
+%Do standardization of samples along all dimensions before applying any
+%kernel technique
+ for i=1:length(binsC)
+     mu(i)=mean(data(:,i));
+     stddev(i)=std(data(:,i));
+     data(:,i)=(data(:,i)-mu(i))/stddev(i);
+     binsC{i}=(binsC{i}-mu(i))/stddev(i);
+ end
+
+M=cov(data); %Covariance matrix, with standardized data should be identity
 grid=[];
 
+if nargin<3 || isempty(method)
 %Method choice: fft is more efficient, but slightly less precise.
 method='fft';
 %method='conv';
-
-if nargin<3
-    bandwidth=(4/(d+2))^(1/(d+4))*n^(-1/(d+4))*M;
 end
+
+if nargin<4 || isempty(bandwidth)
+    bandwidth=1; %No correlations
+end
+%kernel=bandwidth*(4/(d+2))^(2/(d+4))*n^(-2/(d+4))*M;
+kernel=bandwidth*(4/(d+2))^(2/(d+4))*n^(-2/(d+4))*diag(diag(M));
+
+
+if nargin<5 || isempty(weights)
+   weights=ones(1,d); 
+else
+    if any(size(weights)~=[1,d])
+        if all(size(weights)==[d,1])
+            weights=weights';
+        else
+            throw(MException('kdensityn:weights','Size of weight vector is inappropriate for given data: it should be [1,d], where d==size(data,2).'))
+        end
+    end
+end
+
+if nargin<6 || isempty(k)
+    k=5;
+end
+
+
+
 
 if d==1
     p=ksdensity(data,binsC);
-elseif d==2
-    p=ksdensity2(data,binsC,bandwidth);
+%elseif d==2
+%    p=ksdensity2(data,binsC,bandwidth);
 else %d>2
     aux=[];
     aux2=[];
@@ -52,23 +86,70 @@ else %d>2
     str=['counter=zeros(size(grid(' aux3 '1)));'];
     eval(str);
     
-    
-    if strcmp(method,'conv') %Direct method: actually do the convolution
+    %#############################################################################
+    if strcmp(method,'conv') %Direct method: actually do the convolution    
+        
         for i=1:d
             str=['grid(' aux3 'i)=repmat(binsC{i},[' aux2(1:5*i-5) '1,' aux2(5*i+1:end-1) ']);'];
             eval(str);
         end
         coord=reshape(grid,prod(T),d);
         
-    for i=1:n
-        newCoord=(coord'-repmat(data(i,:)',1,prod(T)));
-        convKernel=1/sqrt(det(bandwidth)) * exp(-sum(newCoord'.*(bandwidth\newCoord)',2));
-        str=['convKernel=reshape(convKernel,' aux2(1:end-1) ');'];
-        eval(str);
-        counter=counter+convKernel;
-    end
-    p=counter;
+        for i=1:n
+            newCoord=(coord'-repmat(data(i,:)',1,prod(T)));
+            convKernel=1/sqrt(det(kernel)) * exp(-sum(newCoord'.*(kernel\newCoord)',2));
+            str=['convKernel=reshape(convKernel,' aux2(1:end-1) ');'];
+            eval(str);
+            counter=counter+convKernel;
+        end
+        p=counter;
     
+    %#############################################################################
+    elseif strcmp(method,'varconv') %Convolution with variable kernel: the kernel is of different SIZE for each sample
+        
+        for i=1:d
+            str=['grid(' aux3 'i)=repmat(binsC{i},[' aux2(1:5*i-5) '1,' aux2(5*i+1:end-1) ']);'];
+            eval(str);
+        end
+        coord=reshape(grid,prod(T),d);
+        
+        for i=1:n
+            auxData=data'-repmat(data(i,:)',1,size(data,1));
+            dataDistance=sum((repmat(weights',1,size(data,1)).*(auxData)).^2,1);
+            [~,idx]=sort(dataDistance,'ascend');
+            newCov=n*diag(diag(cov(auxData(:,idx(1:k))')))/k; %Covariance matrix of the k-nearest neighbours of the given sample.
+            %newCov=norm(auxData(:,idx(k)))*eye(d); %Taking just the k-th nearest neighbour distance
+            kernel= bandwidth*(4/(d+2))^(2/(d+4))*n^(-2/(d+4))*newCov; %Computing local kernel.
+            newCoord=(coord'-repmat(data(i,:)',1,prod(T)));
+            convKernel=1/sqrt(det(kernel)) * exp(-sum(newCoord'.*(kernel\newCoord)',2));
+            str=['convKernel=reshape(convKernel,' aux2(1:end-1) ');'];
+            eval(str);
+            counter=counter+convKernel;
+        end
+        p=counter;
+            %#############################################################################
+    elseif strcmp(method,'varshapeconv') %Convolution with variable kernel: the kernel is of different shape & size for each sample
+        
+        for i=1:d
+            str=['grid(' aux3 'i)=repmat(binsC{i},[' aux2(1:5*i-5) '1,' aux2(5*i+1:end-1) ']);'];
+            eval(str);
+        end
+        coord=reshape(grid,prod(T),d);
+        
+        for i=1:n
+            auxData=data'-repmat(data(i,:)',1,size(data,1));
+            dataDistance=sum((repmat(weights',1,size(data,1)).*(auxData)).^2,1);
+            [~,idx]=sort(dataDistance,'ascend');
+            newCov=(n/k)*cov(auxData(:,idx(1:k))');%/diag(diag(cov(auxData(:,idx(1:k))'))); %Matrix with unity eigenvalues, just gives shape
+            kernel= bandwidth*(4/(d+2))^(2/(d+4))*n^(-2/(d+4))*newCov; %Computing local kernel.
+            newCoord=(coord'-repmat(data(i,:)',1,prod(T)));
+            convKernel=1/sqrt(det(kernel)) * exp(-sum(newCoord'.*(kernel\newCoord)',2));
+            str=['convKernel=reshape(convKernel,' aux2(1:end-1) ');'];
+            eval(str);
+            counter=counter+convKernel;
+        end
+        p=counter;
+    %##################################################################################
     elseif strcmp(method,'fft') %Indirect: do it in Fourier space, and rounding some stuff
          str=['counter=zeros(size(grid(' aux3 '1)));'];
          eval(str);
@@ -86,18 +167,16 @@ else %d>2
              eval(str)
          end
          coord=reshape(grid,prod(T),d);
-         kernel=1/sqrt(det(bandwidth)) * exp(-sum(coord.*(inv(bandwidth)*coord')',2));
-         str=['kernel=reshape(kernel,' aux2(1:end-1) ');'];
+         convKernel=1/sqrt(det(kernel)) * exp(-sum(coord.*(kernel\coord')',2));
+         str=['convKernel=reshape(convKernel,' aux2(1:end-1) ');'];
          eval(str);
-         kernel=fftshift(kernel);
-         p=real(ifftn(fftn(counter).*fftn(kernel))); %Avoid numerical errors that give rise to small imaginary parts
+         convKernel=fftshift(convKernel);
+         p=real(ifftn(fftn(counter).*fftn(convKernel))); %Avoid numerical errors that give rise to small imaginary parts
          p(p<0)=0; %Avoid numerical errors that give rise to small negative real parts
     end
     %Normalization:
     p=p/sum(p(:));
 end
-
-
 
 end
 

@@ -25,6 +25,12 @@ end
 if rank==0
     disp('There are no possible factorizations of rank 0, returning')
     return
+elseif rank==size(data,2)
+    %disp('Full rank factorization: returning original matrix.')
+    C=eye(size(data,2));
+    W=data;
+    d=0;
+    return
 end
 
 nm=numel(data);

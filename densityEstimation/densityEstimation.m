@@ -1,4 +1,4 @@
-function [p] = ksdensity2(data,binsC,bandwidth)
+function [p,evalCoord,bandwidth] = densityEstimation(data,evalCoord,bandwidth)
 %densityEstimation estimates a probaiblity density from data points in
 %data. Estimation is done by convolving with a gaussian kernel.
 
@@ -17,6 +17,11 @@ if size(data,1)<=size(data,2)
 end
 
 d=size(data,2); %Dimension of data (<3)
+if d>2
+    error('High-dim (>2) density estimation not yet supported.')
+    return
+end
+
 n=size(data,1); %Number of observations
 M=cov(data); %Covariance matrix
 
@@ -25,18 +30,26 @@ if nargin<3
 end
 
 if d==1
-    p=ksdensity(data,binsC);
+    evalCoord=evalCoord{1};
+    p=ksdensity(data,evalCoord);
+    if nargin>2
+    warning('Using externally supplied kde function (Botev, Density estimation by diffusion), provided bandwidth will be ignored.')
+    end 
+    [bandwidth,p,evalCoord,cdf]=kde(data,length(evalCoord),min(evalCoord),max(evalCoord));
 else %d=2
-    T(1)=length(binsC{1});
-    T(2)=length(binsC{2});
-    bins1=reshape(binsC{1},T(1),1);
-    bins2=reshape(binsC{2},1,T(2));
-    grid=zeros(T(1),T(2),2);
-    grid(:,:,1)=repmat(bins1-mean(bins1),1,T(2));
-    grid(:,:,2)=repmat(bins2-mean(bins2),T(1),1);
-    coord=reshape(grid,T(1)*T(2),2);
-    kernel=1/sqrt(det(bandwidth)) * exp(-(coord'*(bandwidth\coord)));
-    kernel=reshape(kernel,T(1),T(2));
+    error('High-dim (>1) density estimation not yet supported.')
+    return
+    
+%     T(1)=length(binsC{1});
+%     T(2)=length(binsC{2});
+%     bins1=reshape(binsC{1},T(1),1);
+%     bins2=reshape(binsC{2},1,T(2));
+%     grid=zeros(T(1),T(2),2);
+%     grid(:,:,1)=repmat(bins1-mean(bins1),1,T(2));
+%     grid(:,:,2)=repmat(bins2-mean(bins2),T(1),1);
+%     coord=reshape(grid,T(1)*T(2),2);
+%     kernel=1/sqrt(det(bandwidth)) * exp(-(coord'*(bandwidth\coord)));
+%     kernel=reshape(kernel,T(1),T(2));
 end
 
 
