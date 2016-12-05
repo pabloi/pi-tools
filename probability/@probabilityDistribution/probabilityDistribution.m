@@ -11,6 +11,7 @@ classdef probabilityDistribution
         isConditional
         isEmpiric
         isParametric
+        isDiscrete
     end
     
     methods
@@ -24,10 +25,14 @@ classdef probabilityDistribution
         marginalize(dim)
         drawSample(N)
     end
+    methods(Hidden)
+        
+    end
     
     methods(Static)
        newThis=getDistributionOfVariableSum(this,other)
        newThis=getDistributionOfVariableProduct(this,other)
+       newThis=getJointDistribution(this,other)
        
     end
     
