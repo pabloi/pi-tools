@@ -1,4 +1,4 @@
-function [X,P]=filterStationary(Y,A,C,Q,R,x0,P0,b,d)
+function [X,P,Xp,Pp]=filterStationary(Y,A,C,Q,R,x0,P0,b,d)
 %filterStationary implements a Kalman filter assuming
 %stationary (fixed) noise matrices and system dynamics
 %The model is: x[k+1]=A*x[k]+b+v[k], v~N(0,Q)
