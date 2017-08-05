@@ -1,4 +1,4 @@
-function [X,P,Xp,Pp]=filterStationary(Y,A,C,Q,R,x0,P0,b,d)
+function [X,P,Xp,Pp]=filterStationary(Y,A,C,Q,R,x0,P0,b,d,outlierRejection)
 %filterStationary implements a Kalman filter assuming
 %stationary (fixed) noise matrices and system dynamics
 %The model is: x[k+1]=A*x[k]+b+v[k], v~N(0,Q)
@@ -32,7 +32,11 @@ for i=1:size(Y,2)
   [prevX,prevP]=predict(A,Q,prevX,prevP,b);
   Xp(:,i)=prevX;
   Pp(:,:,i)=prevP;
-  [prevX,prevP]=update(C,R,prevX,prevP,d);
+  if ~outlierRejection
+    [prevX,prevP]=update(C,R,prevX,prevP,d);
+  else
+    [prevX,prevP]=update_wOutlierRejection(C,R,prevX,prevP,d);
+  end
   X(:,i)=prevX;
   P(:,:,i)=prevP;
 end
