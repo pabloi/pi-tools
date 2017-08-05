@@ -1,4 +1,4 @@
-function [X,P,Xp,Pp]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,th,constFun)
+function [X,P,Xp,Pp]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun)
 %Same as filterStationary but allowing for a generic constraint model for the states.
 %constFun has to be a function that returns three arguments [H,e,S]=constFun(A*x_k)
 % such that H*x_{k+1} = e + s, with s~N(0,S);
@@ -17,8 +17,8 @@ end
 if nargin<8 || isempty(D)
   D=0;
 end
-if nargin<9 || isempty(th)
-  th=-Inf; %No outliers
+if nargin<9 || isempty(U)
+  U=zeros(size(B,2),size(X,1));
 end
 if nargin<10 || isempty(constFun)
   constFun=@(x) myfun(X);
