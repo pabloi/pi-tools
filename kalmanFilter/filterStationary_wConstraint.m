@@ -49,15 +49,8 @@ for i=1:size(Y,2)
   Z=zeros(size(R,1), size(H,2));
   newR=[R, Z; Z'; S];
   newObs=[obsY;e];
-  innov=newObs-newC*prevX; %Innovation from prior belief
-  obsUncertainty=newC * prevP * newC' + newR;
-  logp=-innov'*pinv(obsUncertainty)*innov; %1/2 of log(p) of observation
-  auxTh=-(th+m*log(2*pi*det(obsUncertainty)));
-  auxLogP=pinv(obsUncertainty)*innov;
-  outlierIndx=auxLogP> (auxTh./innov); %Values of 1 indicate likely outliers
-  %TODO: update only the non-outliers
-    %[prevX,prevP]=update(C,R,prevX,prevP,obsY,d);
-
+  newD=[d;zeros(size(e))];
+  [x,P]=update_wOutlierRejection(newC,newR,prevX,prevP,newObs,d); %Could be w/o rejection
   X(:,i)=prevX;
   P(:,:,i)=prevP;
 end
