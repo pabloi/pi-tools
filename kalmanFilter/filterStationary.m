@@ -38,9 +38,9 @@ for i=1:size(Y,2)
   Pp(:,:,i)=prevP;
   d=D*U(:,i);
   if ~outlierRejection
-    [prevX,prevP]=update(C,R,prevX,prevP,d);
+    [prevX,prevP]=updateKF(C,R,prevX,prevP,Y(:,i),d);
   else
-    [prevX,prevP]=update_wOutlierRejection(C,R,prevX,prevP,d);
+    [prevX,prevP]=update_wOutlierRejection(C,R,prevX,prevP,Y(:,i),d);
   end
   X(:,i)=prevX;
   P(:,:,i)=prevP;

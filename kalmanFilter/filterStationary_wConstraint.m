@@ -46,11 +46,11 @@ for i=1:size(Y,2)
   %Add constraint conditions to observation:
   [H,e,S]=constFun(prevX);
   newC=[C;H];
-  Z=zeros(size(R,1), size(H,2));
-  newR=[R, Z; Z'; S];
+  Z=zeros(size(R,1), size(H,1));
+  newR=[R, Z; Z', S];
   newObs=[obsY;e];
   newD=[d;zeros(size(e))];
-  [x,P]=update_wOutlierRejection(newC,newR,prevX,prevP,newObs,d); %Could be w/o rejection
+  [prevX,prevP]=update_wOutlierRejection(newC,newR,prevX,prevP,newObs,newD); %Could be w/o rejection
   X(:,i)=prevX;
   P(:,:,i)=prevP;
 end
