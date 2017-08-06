@@ -1,5 +1,5 @@
 function [x,P]=update_wOutlierRejection(C,R,x,P,y,d)
-[outlierIndx]=detectOutliers(y,x,P,C,R);
+[outlierIndx]=detectOutliers(y-d,x,P,C,R);
 
 %Update without outliers, by setting outliers to exactly what we expect
 %with inifinite uncertainty

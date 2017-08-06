@@ -1,12 +1,13 @@
 function [outlierIndx]=detectOutliers(y,x,P,C,R)
 m=length(y);
-th=Inf; %Threshold
+th=20; %Threshold
 expY=C*x;
 Py=C*P*C' + R;
 innov=y-expY;
 %logp=innov'*pinv(Py)*innov; %-1/2 of log(p) of observation
 auxTh=th-m*log(2*pi*det(Py));
 auxLogP=pinv(Py)*innov;
+innov.*auxLogP
 outlierIndx=innov.*auxLogP> auxTh; %Values of 1 indicate likely outliers
 
 if any(outlierIndx)

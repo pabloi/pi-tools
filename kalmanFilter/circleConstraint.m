@@ -1,5 +1,6 @@
 function [H,e,S]=circleConstraint(x)
 %x(1)^2+y(1)^2=1
+x=x/norm(x);
 H=x';
 e=1;
 S=.01;

@@ -14,16 +14,24 @@ for i=2:N
   Y(:,i)=C*X(:,i)+ r*randn(2,1);
 end
 
+%% Add S&P noise
+idx=randi(N,20);
+Y(:,idx)=5;
+
 %% Run filter w/o constraint
 Q=.01*eye(2);
 q=sqrtm(Q);
 outRej=0; %No outlier rejection
-x0=[0;0];
-P0=1e3*eye(2);
+x0=[1;0];
+P0=1e3*ones(2);
 B=[0;0];
 D=[0;0];
 U=zeros(1,N);
 [Xs,Ps,Xp,Pp]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
+
+%% Filter outliers
+outRej=1;
+[Xs3,Ps3,Xp3,Pp3]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
 
 %% Run filter adding constraint
 constFun=@(x) circleConstraint(x);
