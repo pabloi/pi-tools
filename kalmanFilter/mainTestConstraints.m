@@ -36,3 +36,7 @@ outRej=1;
 %% Run filter adding constraint
 constFun=@(x) circleConstraint(x);
 [Xs2,Ps2,Xp2,Pp2]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun);
+
+%% Compare & contrast
+figure; plot(Y(1,:),Y(2,:)); hold on; plot(Xs(1,:),Xs(2,:)); plot(Xs2(1,:),Xs2(2,:)); plot(Xs3(1,:),Xs3(2,:))
+figure; hold on; histogram(Xs(1,:)-X(1,:)); histogram(Xs2(1,:)-X(1,:)); histogram(Xs3(1,:)-X(1,:))

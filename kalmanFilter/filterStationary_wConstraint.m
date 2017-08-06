@@ -42,17 +42,34 @@ for i=1:size(Y,2)
   Xp(:,i)=prevX;
   Pp(:,:,i)=prevP;
   obsY=Y(:,i);
-
-  %Add constraint conditions to observation:
+  
+  %Additional update to ~enforce constraints
+  %This update needs to be made independently of the classic on
+  %if we want the outlier rejection to work (otherwise we could 
+  %be rejecting all 'true' measurements and keeping the fake ones,
+  %which may be problematic since C has to guarantee some form of 
+  %observability but D does not. On a very bad model we could even
+  %reject constraints!
   [H,e,S]=constFun(prevX);
-  newC=[C;H];
-  Z=zeros(size(R,1), size(H,1));
-  newR=[R, Z; Z', S];
-  newObs=[obsY;e];
-  newD=[d;zeros(size(e))];
-  [prevX,prevP]=update_wOutlierRejection(newC,newR,prevX,prevP,newObs,newD); %Could be w/o rejection
+  [prevX,prevP]=updateKF(H,S,prevX,prevP,e,zeros(size(e)));
+  
+  %Classic update w/ outlier rejection
+  [prevX,prevP]=update_wOutlierRejection(C,R,prevX,prevP,obsY,d); %Could be w/o rejection
   X(:,i)=prevX;
   P(:,:,i)=prevP;
+  
+  %Olde way: (2 steps in 1)
+    %Add constraint conditions to observation:
+%   [H,e,S]=constFun(prevX);
+%   newC=[C;H];
+%   Z=zeros(size(R,1), size(H,1));
+%   newR=[R, Z; Z', S];
+%   newObs=[obsY;e];
+%   newD=[d;zeros(size(e))];
+%   [prevX,prevP]=update_wOutlierRejection(newC,newR,prevX,prevP,newObs,newD); %Could be w/o rejection
+%   X(:,i)=prevX;
+%   P(:,:,i)=prevP;
+
 end
 
 end
