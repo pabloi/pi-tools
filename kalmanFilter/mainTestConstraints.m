@@ -27,16 +27,21 @@ P0=1e3*ones(2);
 B=[0;0];
 D=[0;0];
 U=zeros(1,N);
-[Xs,Ps,Xp,Pp]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
+[Xs,Ps,Xp,Pp,rejSamples]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
 
 %% Filter outliers
 outRej=1;
-[Xs3,Ps3,Xp3,Pp3]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
+[Xs3,Ps3,Xp3,Pp3,rejSamples]=filterStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
 
+%% Smooth w/outlier rejection
+[Xs4,Ps4,Xa,Pa,Xp,Pp,rejSamples]=smoothStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej);
 %% Run filter adding constraint
 constFun=@(x) circleConstraint(x);
-[Xs2,Ps2,Xp2,Pp2]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun);
+[Xs2,Ps2,Xp2,Pp2,rejSamples]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun);
+
+%% Smooth w/outlier rejection & constraint
+[Xs5,Ps5,Xa5,Pa5,Xp5,Pp5,rejSamples]=smoothStationary(Y,A,C,Q,R,x0,P0,B,D,U,outRej,constFun);
 
 %% Compare & contrast
-figure; plot(Y(1,:),Y(2,:)); hold on; plot(Xs(1,:),Xs(2,:)); plot(Xs2(1,:),Xs2(2,:)); plot(Xs3(1,:),Xs3(2,:))
-figure; hold on; histogram(Xs(1,:)-X(1,:)); histogram(Xs2(1,:)-X(1,:)); histogram(Xs3(1,:)-X(1,:))
+figure; plot(Y(1,:),Y(2,:)); hold on; plot(Xs(1,:),Xs(2,:)); plot(Xs2(1,:),Xs2(2,:)); plot(Xs3(1,:),Xs3(2,:));plot(Xs4(1,:),Xs4(2,:)); plot(Xs5(1,:),Xs5(2,:))
+figure; hold on; histogram(Xs(1,:)-X(1,:)); histogram(Xs2(1,:)-X(1,:)); histogram(Xs3(1,:)-X(1,:)); histogram(Xs4(1,:)-X(1,:));histogram(Xs5(1,:)-X(1,:));
