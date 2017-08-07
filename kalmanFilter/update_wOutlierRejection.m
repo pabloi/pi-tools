@@ -1,4 +1,4 @@
-function [x,P]=update_wOutlierRejection(C,R,x,P,y,d)
+function [x,P,outlierIndx]=update_wOutlierRejection(C,R,x,P,y,d)
 [outlierIndx]=detectOutliers(y-d,x,P,C,R);
 
 if any(~outlierIndx)

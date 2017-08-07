@@ -1,4 +1,4 @@
-function [X,P,Xp,Pp]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun)
+function [X,P,Xp,Pp,rejSamples]=filterStationary_wConstraint(Y,A,C,Q,R,x0,P0,B,D,U,constFun)
 %Same as filterStationary but allowing for a generic constraint model for the states.
 %constFun has to be a function that returns three arguments [H,e,S]=constFun(A*x_k)
 % such that H*x_{k+1} = e + s, with s~N(0,S);
@@ -35,6 +35,7 @@ Pp=nan(size(A,1),size(A,1),size(Y,2));
 P=nan(size(A,1),size(A,1),size(Y,2));
 prevX=x0;
 prevP=P0;
+rejSamples=zeros(size(Y));
 for i=1:size(Y,2)
   b=B*U(:,i);
   d=D*U(:,i);
@@ -54,7 +55,7 @@ for i=1:size(Y,2)
   [prevX,prevP]=updateKF(H,S,prevX,prevP,e,zeros(size(e)));
   
   %Classic update w/ outlier rejection
-  [prevX,prevP]=update_wOutlierRejection(C,R,prevX,prevP,obsY,d); %Could be w/o rejection
+  [prevX,prevP,rejSamples(:,i)]=update_wOutlierRejection(C,R,prevX,prevP,obsY,d); %Could be w/o rejection
   X(:,i)=prevX;
   P(:,:,i)=prevP;
   
