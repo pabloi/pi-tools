@@ -1,4 +1,4 @@
-function [model] = sPCAv6(Y,dynOrder,forcePCS,nullBD,outputUnderRank)
+function [model] = sPCAv7(Y,dynOrder,forcePCS,nullBD,outputUnderRank)
 %sPCA or smooth PCA, aims at estimating a best-fit space-state model from
 %given outputs Y, and assuming constant input. It is similar to cPCA, but
 %it doesn't purposefully identify the canonical states
@@ -40,66 +40,45 @@ end
 NN=size(Y,1); %Number of samples
 DD=size(Y,2); %Dimensionality of data
 realPolesOnly=true; %Only acceptable value right now
+rankC=dynOrder-outputUnderRank;
 
 %% Find a first solution: PCA + dynamic fit over PCA coefficients: fast and good enough
-%Do PCA to extract the #order most meaningful PCs:
+rankD=0;
 if ~nullBD
-    mY=mean(Y,1); %Better-conditioned problem(?) if we remove the mean first, but less optimal(?)
-else
-    mY=0;
+    rankD=1;
 end
-M=dynOrder-outputUnderRank;
-YY=(Y-mY)';
-[p,c]=pca(YY,'Centered',false);
-CD=c(:,1:M);
-P=p(:,1:M)';
-if ~nullBD
-    CD=[CD mY'];
-    P=[P;ones(1,size(P,2))];
-    M=M+1;
-end
+rankCD=rankC+rankD;
+[p,c]=pca(YY,'Centered',false); %Do PCA to extract the #order most meaningful PCs:
+CD=c(:,1:rankcCD);
+P=p(:,1:rankCD)';
 
-%Estimate dynamics:
+%Estimate dynamics from PCA:
 [J,X,V,K] = estimateDynv3(P, realPolesOnly, nullBD, dynOrder);
-if forcePCS
-    CD=CD*[V K]; %Equivalent to: CD=(CD*P)/X; %Rotating PCs
-    if ~nullBD
-        CD(:,dynOrder+1)=CD(:,dynOrder+1)+mY';
-    end
-else
-    CD=Y'/X; %This improves r2 slightly (and may increase rank if outputUnderRank>0)
-    if outputUnderRank>0 && size(CD,1)>=M   %Need to reduce rank: using reduced-rank reg when dim data => M
+%EstimateDynv3 returns states X such that states are exponentially decaying
+%(except constant term, if present) so asymptotic state is 0, and initial
+%states are all =1.
+
+if ~forcePCS
+    %Iterate for optimal solution:
+    CD=Y'/X; %Compute optimal subspace given states
+    if size(CD,1)>=rankC   %Need to reduce rank: using reduced-rank reg when dim data => M
         %See: https://stats.stackexchange.com/questions/152517/what-is-reduced-rank-regression-all-about
         Yfit=CD*X;
         [ww,hh,aa]=pca(Yfit','Centered',false);
         CD=ww(:,1:M)*ww(:,1:M)'*CD;
     end
+    [J,X,V,K] = estimateDynv3(CD\Y', realPolesOnly, nullBD, dynOrder); % Compute optimal states given projection onto subspace
+else %forcePCS flag forces the PCA subspace, so we don't iterate:
+    CD=CD*[V K]; %Equivalent to: CD=(CD*P)/X; %Rotating PCs
+    if ~nullBD
+        CD(:,rankCD)=CD(:,rankCD)+mY';
+    end
 end
-
-%% Optimize solution: %Estimating J,B,CD altogether, is slow and in practice improves very little (convergence issues?)
-%  if ~forcePCS %No improvement possible if forcePCS=true
-%     if ~nullBD
-%         D=CD(:,dynOrder+1);
-%         X=X(1:dynOrder,:);
-%     else
-%         D=zeros(size(C,1),1);
-%     end
-%     P=C\(YY-D);
-%     if ~nullBD
-%         P=[P;ones(1,size(P,2))];
-%     end
-%      [J,X] = estimateDynv3(P, realPolesOnly, nullBD, J);
-%      CD=YY/X;
-%  end
 
 %% Decompose solution:
-C=CD(:,1:dynOrder);
-if ~nullBD
-    D=CD(:,dynOrder+1);
-    X=X(1:dynOrder,:);
-else
-    D=zeros(size(C,1),1);
-end
+C=CD(:,1:rankC);
+X=X(1:rankC,:);
+D=CD(:,[rankC+1:end]); %Empty if nullBD==true
 B=zeros(size(X,1),1); %This is by convention of estimateDynv3 results
 %% Normalize columns of C as convention (and normalize X accordingly)
 scale=sqrt(sum(C.^2));

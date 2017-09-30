@@ -78,17 +78,7 @@ end
 
 %% Optimize solution: %Estimating J,B,CD altogether, is slow and in practice improves very little (convergence issues?)
 %  if ~forcePCS %No improvement possible if forcePCS=true
-%     if ~nullBD
-%         D=CD(:,dynOrder+1);
-%         X=X(1:dynOrder,:);
-%     else
-%         D=zeros(size(C,1),1);
-%     end
-%     P=C\(YY-D);
-%     if ~nullBD
-%         P=[P;ones(1,size(P,2))];
-%     end
-%      [J,X] = estimateDynv3(P, realPolesOnly, nullBD, J);
+%      [J,X] = estimateDynv3([C\(YY-D) ], realPolesOnly, nullBD, J);
 %      CD=YY/X;
 %  end
 

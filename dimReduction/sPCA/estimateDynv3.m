@@ -15,7 +15,7 @@ function [J,Xh,V,K] = estimateDynv3(X, realPolesOnly, nullK, J0)
 % Pablo A. Iturralde - Univ. of Pittsburgh - Last rev: Jun 27th 2017
 
 NN=size(X,2);
-if numel(J0)==1
+if numel(J0)==1 && J0>=1
     order=J0;
     t0=[.1*NN*(1./[1:order]')]; %Initializing to reasonable values, works for realPolesOnly=true
     reps=10;
