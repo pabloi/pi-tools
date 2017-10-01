@@ -18,7 +18,7 @@ NN=size(X,2);
 if numel(J0)==1 && J0>=1
     order=J0;
     t0=[.1*NN*(1./[1:order]')]; %Initializing to reasonable values, works for realPolesOnly=true
-    reps=10;
+    reps=1;
 else
     order=size(J0,1);
     t0=-1./log(eig(J0));
@@ -49,7 +49,7 @@ if realPolesOnly % Optimize to find best decaying exponential fits:
     tau=bestXX;
     [Xh]=decays(tau,NN,nullK); %Estimate of states
     J=diag(exp(-1./tau));
-    
+
     %Find linear regression:
     if nargout>2
         VK=X/Xh;
@@ -67,7 +67,7 @@ end
 end
 
 function E=decays(tau,NN,nullK)
-    E=exp(-[0:NN-1]./tau); 
+    E=exp(-[0:NN-1]./tau);
     if ~nullK
         E=[E;ones(1,NN)];
     end
