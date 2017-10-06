@@ -19,7 +19,7 @@ NN=size(X,2);
 if numel(J0)==1 && J0>=1
     order=J0;
     %t0=[.1*NN*(1./[1:order]')]; %Initializing to reasonable values, works for realPolesOnly=true
-    t0=[.1*randi(NN,order,1)]; %Initializing to random values
+    t0=[randi(NN,order,1)+abs(randn(order,1))]; %Initializing to random values
     reps=10;
 else
     order=size(J0,1);
