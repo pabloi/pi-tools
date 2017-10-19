@@ -15,6 +15,8 @@ function [h,pThreshold,i1] = BenjaminiHochberg(p,fdr)
 %h=p<=pThreshold
 %i1 = no. of significant results, equals sum(h)
 
+%Validated on OCt 19th 2017 against fdr_bh() function from Matlab Exchange
+
 M=numel(p); %No. of total comparisons
 
 [p1,idx]=sort(p(:),'ascend');
