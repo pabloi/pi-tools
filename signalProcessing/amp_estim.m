@@ -29,7 +29,7 @@ procList{2}=['Rectification, order=' num2str(mod_ord)];
 Wn=2*cutoff/fs;
 procList{3}=fdesign.lowpass('Fp,Fst,Ap,Ast',Wn,2*Wn,3,10);
 lowPassFilter=design(procList{3},'butter');
-emg4=filtfilthd(lowPassFilter,emg3);
+emg4=filtfilthd_short(lowPassFilter,emg3,'reflect',fs); %1 sec of data for reflective boundaries
 
 %Alternative smoothing: convolving with a moving window (as suggested in
 %Merletti & Parker)
