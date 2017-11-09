@@ -24,6 +24,7 @@ hgexport(h, [fullName '.png'], hgexport('factorystyle'), 'Format', 'png');
 % write it back out - setting transparency info
 cdata = imread([fullName '.png']);
 imwrite(cdata, [fullName '.png'], 'png', 'BitDepth', 16, 'transparency', [0.8 0.8 0.8])%background)
+set(h,'color',[1 1 1]);
 
 end
 
