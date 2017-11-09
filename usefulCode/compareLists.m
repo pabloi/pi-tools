@@ -9,27 +9,7 @@ function [bool,idxs] = compareLists(list1,list2)
 %any(strcmp(list2{i},list1{idxs(i)}))=true. Note that since list1{idxs(i)}
 %may contain a cell array of strings, strcmp(list2{i},list1{idxs(i)}) may
 %return a boolean vector
-if isa(list2,'char')
-    list2={list2};
-end
-if ~isa(list2,'cell') || ~all(cellfun(@(x) isa(x,'char'),list2))
-    error('List2 has to be a cell array containing strings.');
-end
-
-bool=false(size(list2));
-idxs=nan(size(list2));
-for i=1:length(list1)
-    if isa(list1{i},'cell')
-        [aux,~] = compareLists(list1{i},list2);
-    elseif isa(list1{i},'char')
-        aux=strcmp(list1{i},list2); %Compares the full list2 to one element of list1
-    else
-        error('List1 has to be a cell array containing strings or nested cell-arrays of strings');
-    end
-    idxs(aux)=i;
-    bool=bool | aux;
-end
-
-
+warning('Deprecated: use compareListsNested')
+[bool,idxs] = compareListsNested(list1,list2);
 end
 
