@@ -10,18 +10,8 @@ if isa(list2,'char')
         idxs=find(bool);
     end
 else
-%     idxs=nan(size(list2));
      N1=numel(list1);
-     N2=numel(list2);
-%     list1=reshape(list1,N1,1);
-%     list2=reshape(list2,1,N2);
-%     aux=strcmp(repmat(list1,1,N2),repmat(list2,N1,1));
-%     bool=any(aux);
-%     if nargout>1
-%         [ii,jj]=find(aux);
-%         idxs(jj)=ii; %If more than one match is found for any element, the last is used(!)
-%     end
-%     
+     N2=numel(list2);  
     bool=false(1,N2);
     idxs=nan(1,N2);
     idxList=1:N1;

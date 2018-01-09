@@ -4,14 +4,18 @@ function saveFig(h,dir,fileName,sizeFlag)
 if nargin<4 || isempty(sizeFlag)
 set(h,'Units','Normalized','OuterPosition',[0 0 1 1])
 end
-fullName=[dir fileName];
 if ~exist(dir,'dir')
     mkdir(dir)
 end
 
-savefig(h,[fullName '.fig'],'compact') ;
-hgexport(h, [fullName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
+%Save fig:
+savefig(h,[dir 'fig/' fileName '.fig'],'compact') ;
 
+%Save eps:
+hgexport(h,[dir 'eps/' fileName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
+
+%Save png:
+fullName=[dir 'png/' fileName];
 %Workaround for transparent background (on png):
 % save the original background color for later use
 background = get(h, 'color'); 

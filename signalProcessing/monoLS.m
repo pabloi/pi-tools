@@ -13,6 +13,14 @@ function [z] = monoLS(y,p,monotonicDerivativeFlag,regularizeFlag)
 %taken at the end of the z if y is increasing, and at the beginning of z if
 %it is decreasing. It avoids overfit of said samples.
 
+%TODO:
+%1) Confim that the optimization (p=2) works (against some good optimization library?)
+%2) Make sure optimization (p=2) is efficient
+%3) Allow for user to enforce sign of optimization (increasing or decreasing)
+%4) Add optimization over both increasing and decreasing functions, and
+%choose the best fit (still according to p-norm) over both.
+%5) Fix convergence for p~=0
+
 
 if nargin<2 || isempty(p)
     p=2;
@@ -39,7 +47,7 @@ else %Vector input-data
     if ~all(idx)
     y=y(~idx);
 
-    %Determine if data is increasing or decreasing:
+    %Determine if data is increasing or decreasing through the best 2-norm line fit:
     pp=polyfit([1:numel(y)]',y,1);
     s=sign(pp(1));
     s=sign(mean(diff(y))); %Alternative determination of increasing/decreasing
