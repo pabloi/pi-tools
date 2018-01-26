@@ -9,12 +9,21 @@ if ~exist(dir,'dir')
 end
 
 %Save fig:
+if ~exist([dir 'fig/'],'dir')
+    mkdir([dir 'fig/'])
+end
 savefig(h,[dir 'fig/' fileName '.fig'],'compact') ;
 
 %Save eps:
+if ~exist([dir 'eps/'],'dir')
+    mkdir([dir 'eps/'])
+end
 hgexport(h,[dir 'eps/' fileName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
 
 %Save png:
+if ~exist([dir 'png/'],'dir')
+    mkdir([dir 'png/'])
+end
 fullName=[dir 'png/' fileName];
 %Workaround for transparent background (on png):
 % save the original background color for later use

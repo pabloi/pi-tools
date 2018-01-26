@@ -1,5 +1,5 @@
 function [filteredData] = idealHPF(data,fcut)
-%Implements an idealLPF with zero lag
+%Implements an idealHPF with zero lag
 %fcut is in normalized freq, needs to be in [0,.5]
 
 [Fdata,fvector] = DiscreteTimeFourierTransform(data,1);

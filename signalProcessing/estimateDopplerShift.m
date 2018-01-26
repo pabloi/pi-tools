@@ -30,10 +30,11 @@ differences=true;
 while differences
     
     clear s x t lineFit
+    t=nan(1,N);
     for i=1:N
         aux2=signal2((i-1)*M+1:i*M); %Getting a portion of signal2
         aux1=signal1((i-1)*M+1:i*M);
-        [~,~,t(i)]=findTimeLag(aux1,aux2,1,Inf);
+        [~,~,t(i)]=findTimeLag(aux1,aux2);
 %         F1=fft(aux1);
 %         F2=fft(aux2);
 %         F=F1.*conj(F2);
