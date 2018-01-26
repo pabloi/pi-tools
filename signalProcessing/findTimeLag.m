@@ -20,7 +20,7 @@ P2=interp1(0:length(P)-1,P,aux,'spline')/sqrt(sum(referenceSignal.^2)*sum(second
 lagInSamples=aux(t)-floor(M/2); %The -floor(M/2) term accounts for the fftshift
 corrCoef=P2(t);
 
-if abs(corrCoef)<.5
+if abs(corrCoef)<.3
     warning(['Could not synch signals: r^2= ' num2str(abs(corrCoef))])
 end
 timeDiff = NaN;
