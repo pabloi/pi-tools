@@ -1,3 +1,6 @@
 [submodule "monoLS"]
 	path = monoLS
 	url = www.github.com/pabloi/monoLS
+[submodule "matlab-sysID"]
+	path = matlab-sysID
+	url = www.github.com/pabloi/matlab-sysID
