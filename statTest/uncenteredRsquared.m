@@ -19,7 +19,9 @@ Rsquared.uncenteredAdj=1-(SSE/SST2)*(N/lm.DFE); %N dof
 
 %Check:
 if abs(lm.Rsquared.Ordinary-(SSR/(SSR+SSE)))>100*eps
-   error('Centered R^2 values don''t match') 
+    if isempty(lm.Robust)
+        error('Centered R^2 values don''t match') 
+    end
 end
 
 end

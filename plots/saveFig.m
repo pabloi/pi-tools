@@ -1,8 +1,8 @@
 function saveFig(h,dir,fileName,sizeFlag)
 %saveFig saves figure h as .fig and .png for further reference
-
+set(h,'PaperPositionMode','manual')
 if nargin<4 || isempty(sizeFlag)
-set(h,'Units','Normalized','OuterPosition',[0 0 1 1])
+    set(h,'Units','Normalized','OuterPosition',[0 0 1 1])
 end
 if ~exist(dir,'dir')
     mkdir(dir)
@@ -18,7 +18,9 @@ savefig(h,[dir 'fig/' fileName '.fig'],'compact') ;
 if ~exist([dir 'eps/'],'dir')
     mkdir([dir 'eps/'])
 end
-hgexport(h,[dir 'eps/' fileName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
+%hgexport(h,[dir 'eps/' fileName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
+%saveas(h,[dir 'eps/' fileName '.eps'], 'epsc','-r1200');
+print(h,[dir 'eps/' fileName '.eps'],'-depsc','-tiff','-r0')
 
 %Save png:
 if ~exist([dir 'png/'],'dir')
@@ -38,6 +40,12 @@ hgexport(h, [fullName '.png'], hgexport('factorystyle'), 'Format', 'png');
 cdata = imread([fullName '.png']);
 imwrite(cdata, [fullName '.png'], 'png', 'BitDepth', 16, 'transparency', [0.8 0.8 0.8])%background)
 set(h,'color',[1 1 1]);
+
+%Save svg
+% if ~exist([dir 'svg/'],'dir')
+%     mkdir([dir 'svg/'])
+% end
+% saveas(h,[dir 'svg/' fileName '.svg'], 'svg');
 
 end
 
