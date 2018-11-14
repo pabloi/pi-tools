@@ -19,8 +19,8 @@ if ~exist([dir 'eps/'],'dir')
     mkdir([dir 'eps/'])
 end
 %hgexport(h,[dir 'eps/' fileName '.eps'], hgexport('factorystyle'), 'Format', 'eps');
-%saveas(h,[dir 'eps/' fileName '.eps'], 'epsc','-r1200');
-print(h,[dir 'eps/' fileName '.eps'],'-depsc','-tiff','-r0')
+%saveas(h,[dir 'eps/' fileName '.eps'], 'epsc');
+print(h,[dir 'eps/' fileName '.eps'],'-depsc','-tiff','-r2400','-opengl')
 
 %Save png:
 if ~exist([dir 'png/'],'dir')
