@@ -4,3 +4,6 @@
 [submodule "matlab-sysID"]
 	path = matlab-sysID
 	url = www.github.com/pabloi/matlab-sysID
+[submodule "robustCov"]
+	path = robustCov
+	url = www.github.com/pabloi/robustCov
