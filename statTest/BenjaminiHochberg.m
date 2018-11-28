@@ -13,7 +13,7 @@ function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr)
 %h= binary vector that is 1 if the corresponding p-value was deemed
 %significant, and 0 if not.
 %pThreshold = value that ends up being the cut-off for p. Should satisfy:
-%h=p<=pThreshold
+%h = p<=pThreshold = pAdjusted<fdr
 %i1 = no. of significant results, equals sum(h)
 %pAdjusted = adjusted p-values
 
