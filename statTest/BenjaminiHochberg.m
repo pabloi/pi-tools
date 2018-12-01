@@ -1,4 +1,4 @@
-function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr)
+function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr,twoStageFlag)
 %Performs the Benjamini-Hochberg procedure to determine significance in
 %multiple comparisons while controlling the False Discovery Rate (number of 
 %false positives as a % of the number of total comparisons). This is a
@@ -6,9 +6,12 @@ function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr)
 %FDR control is done in expectation over many realizations.
 %
 %INPUT:
-%p= vector of p-values from the multiple comparisons, has to be 1-D
-%fdr= value in [0,1] that determines the (expected) False Discovery Rate that is
+%p: vector of p-values from the multiple comparisons, has to be 1-D
+%fdr: value in [0,1] that determines the (expected) False Discovery Rate that is
 %tolerated
+%twoStageFlag: if true, it performs the two-stage procedure suggested in
+%Benjamini, Krieger and Yekuteli 2006, which maintains fdr control
+%guarantees (under independent tests) but has more power. Default = false.
 %OUTPUT:
 %h= binary vector that is 1 if the corresponding p-value was deemed
 %significant, and 0 if not.
@@ -17,10 +20,21 @@ function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr)
 %i1 = no. of significant results, equals sum(h)
 %pAdjusted = adjusted p-values
 
-%Validated on Oct 19th 2017 against fdr_bh() function from Matlab Exchange
+%Validated on Oct 19th 2017 against fdr_bh() function from Matlab Exchange,
+%and on Nov 29th 2018 agains BioInformatic's Toolbox mafdr()
 %References:
 %Benjamini & Hochberg 1995
-%Smyth 2002 (?) (for definition of adjusted p-values)
+%Yekuteli & Benjamini 1999 (for definition of adjusted p-values)
+%Benjamini, Krieger and Yekuteli 2006 (for two-stage procedure)
+
+if nargin<3 || isempty(twoStageFlag)
+    twoStageFlag=false;
+end
+if twoStageFlag
+    fdr=fdr/(1+fdr); %BKY procedure requires using this value 
+    %in the first pass for FDR guarantee, although authors later use fdr
+    %itself and claim that it is ok in practice.
+end
 
 M=numel(p); %No. of total comparisons
 
@@ -51,6 +65,9 @@ if nargout>3 %Computing adjusted p-values
     pAdjusted(idx)=newP;
 end
 
+if twoStageFlag
+    [h,pThreshold,i1] = BenjaminiHochberg(p,fdr*M/(M-i1),false);
+end
 
 end
 
