@@ -1,10 +1,11 @@
 function [h,pThreshold,i1,pAdjusted] = BenjaminiHochberg(p,fdr,twoStageFlag)
 %Performs the Benjamini-Hochberg procedure to determine significance in
-%multiple comparisons while controlling the False Discovery Rate (number of 
+%multiple comparisons while controlling the False Discovery Rate (number of
 %false positives as a % of the number of total comparisons). This is a
 %less taxing alternative to performing a Bonferroni correction, for example.
 %FDR control is done in expectation over many realizations.
-%
+%See also: mafdr
+
 %INPUT:
 %p: vector of p-values from the multiple comparisons, has to be 1-D
 %fdr: value in [0,1] that determines the (expected) False Discovery Rate that is
@@ -31,9 +32,9 @@ if nargin<3 || isempty(twoStageFlag)
     twoStageFlag=false;
 end
 if twoStageFlag
-    fdr=fdr/(1+fdr); %BKY procedure requires using this value 
-    %in the first pass for FDR guarantee, although authors later use fdr
-    %itself and claim that it is ok in practice.
+    fdr=fdr/(1+fdr); %BKY procedure requires using this value
+    %in the first and second pass for FDR guarantee, although authors later use fdr
+    %itself for the first pass and claim that it is ok in practice.
 end
 
 M=numel(p); %No. of total comparisons
@@ -70,4 +71,3 @@ if twoStageFlag
 end
 
 end
-
